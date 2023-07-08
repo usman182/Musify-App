@@ -13,7 +13,10 @@ class Screen5 extends StatefulWidget {
   var musicName;
   var musicUrl;
 
-  Screen5(this.musicName, this.musicUrl);
+  var playlistName;
+  var playlistDescription;
+
+  Screen5(this.musicName, this.musicUrl, this.playlistName, this.playlistDescription);
 
   @override
   State<Screen5> createState() => _Screen5State();
@@ -93,7 +96,7 @@ class _Screen5State extends State<Screen5> {
                         ),
                         Container(
                             margin: EdgeInsets.only(top: 10),
-                            child: Text("Playlist 1", style: TextStyle(color: Color(0xFFd4b300), fontWeight: FontWeight.normal, fontSize: 20,),)
+                            child: Text(widget.playlistName, style: TextStyle(color: Color(0xFFd4b300), fontWeight: FontWeight.normal, fontSize: 20,),)
                         ),
                       ],
                     ),

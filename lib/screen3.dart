@@ -30,6 +30,7 @@ class _Screen3State extends State<Screen3> {
   String emailFromFirestore = "";
   String passwordFromFirestore = "";
 
+  bool signUpWithNewId = false;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +47,9 @@ class _Screen3State extends State<Screen3> {
                   alignment: Alignment.topRight,
                   child: Text("Sign Up", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20,),),
                 ),
-                onTap: () {
+                onTap: ()  {
+                  // await Future.delayed(Duration(milliseconds: 500));
+                  // signUpWithNewId = true;
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => Screen2(),),);
                 },
@@ -130,23 +133,24 @@ class _Screen3State extends State<Screen3> {
 
                     FirebaseAuth auth = FirebaseAuth.instance;
                     User? user = auth.currentUser;
+                    // print("User is ${user?.uid}");
 
                     if (user != null) {
                       CollectionReference<Map<String, dynamic>> collection =
                       FirebaseFirestore.instance.collection("Users");
-                      QuerySnapshot<Map<
-                          String,
-                          dynamic>> snapshot = await collection.get();
+                      CollectionReference<Map<String, dynamic>> profileCollection = collection.doc(user.uid).collection("Profile");
 
-                      List<QueryDocumentSnapshot<Map<String,
-                          dynamic>>> documents = snapshot.docs;
-                      for (var document in documents) {
-                        // Access document data using document.data()
-                        Map<String, dynamic> data = document.data();
+                      DocumentSnapshot snapshot =
+                      await profileCollection.doc(user.uid).get();
+
+                      if (snapshot.exists) {
+                        // Access document data using snapshot.data()
+                        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
                         // Perform desired operations with the data
 
                         emailFromFirestore = data["Email"];
                         passwordFromFirestore = data["Password"];
+                        print("User is $emailFromFirestore");
                       }
                     }
 

@@ -1,5 +1,11 @@
 
 
+
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:musify_app/screen10.dart';
@@ -9,6 +15,11 @@ import 'package:musify_app/screen5.dart';
 
 class Screen9 extends StatefulWidget {
 
+
+  File mp3File;
+  String mp3FileName, mp3FilePath, titleOfMusic, genreOfMusic, descOfMusic;
+
+  Screen9(this.mp3File, this.mp3FileName, this.mp3FilePath, this.titleOfMusic, this.genreOfMusic, this.descOfMusic);
 
   @override
   State<Screen9> createState() => _Screen9State();
@@ -121,9 +132,43 @@ class _Screen9State extends State<Screen9> {
                             borderRadius: BorderRadius.circular(30.0)
                         ),),
                       ),
-                      onPressed: () {
-                        Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Screen5("",""),),);
+                      onPressed: () async {
+
+                        FirebaseAuth auth = FirebaseAuth.instance;
+                        User? user = auth.currentUser;
+
+                        Reference storageRef = FirebaseStorage.instance.ref().child('${user?.uid}/${playlistNameController.text.toString()}/mp3s/${widget.mp3FileName}');
+                        UploadTask uploadTask = storageRef.putFile(widget.mp3File);
+
+                        TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+                        String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
+
+                        if (user != null) {
+                          CollectionReference<Map<String, dynamic>> collection = FirebaseFirestore.instance.collection("Users");
+                          CollectionReference<Map<String, dynamic>> profileCollection = collection.doc(user.uid).collection("Profile");
+
+                          DocumentSnapshot<Map<String, dynamic>> snapshot = await profileCollection.doc(user.uid).get();
+
+                          if (snapshot.exists) {
+                            Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+
+
+                            CollectionReference<Map<String, dynamic>> musicCollection = collection.doc(user.uid).collection("Playlist");
+
+
+                            // Add the data to the "Music collection
+                            await musicCollection.doc(playlistNameController.text.toString()).set({
+                              "Title": widget.titleOfMusic,
+                              "Genre": widget.genreOfMusic,
+                              "Description": widget.descOfMusic,
+                            });
+
+                            Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => Screen5(widget.mp3FileName, widget.mp3FilePath, playlistNameController.text.toString(), descController.text.toString()),),);
+                          }
+                        }
+
                       },
                       child: Text("Add Playlist", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),),
                     ),

@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:musify_app/screen10.dart';
+
 import 'package:musify_app/screen2.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:musify_app/screen3.dart';
 import 'firebase_options.dart';
 
 
@@ -43,19 +45,62 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
   final String documentId = "";
+  bool signUpWithNewId = false;
+  var emailFromFirestore = "",
+      passwordFromFirestore = "";
 
   @override
   void initState() {
     super.initState();
 
-    Timer(Duration(seconds: 2), () {
+    // getCurrentUserData();
 
+
+    Timer(Duration(seconds: 2), () {
+      // signUpWithNewId = true;
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => Screen2(),));
     },);
 
 
   }
+
+  // Future<void> getCurrentUserData() async {
+  //   FirebaseAuth auth = FirebaseAuth.instance;
+  //   User? user = auth.currentUser;
+  //
+  //   if (user != null) {
+  //     CollectionReference<Map<String, dynamic>> collection =
+  //     FirebaseFirestore.instance.collection("Users");
+  //
+  //     DocumentSnapshot snapshot =
+  //     await collection.doc(user.uid).get();
+  //
+  //     if (snapshot.exists) {
+  //       // Access document data using snapshot.data()
+  //       Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+  //       // Perform desired operations with the data
+  //
+  //       emailFromFirestore = data["Email"];
+  //       passwordFromFirestore = data["Password"];
+  //       print("User is $emailFromFirestore");
+  //     }
+  //     Navigator.push(context,
+  //       MaterialPageRoute(builder: (context) {
+  //         return Screen3(emailFromFirestore,
+  //             passwordFromFirestore);
+  //       }),);
+  //   }
+  //   else {
+  //     // await Future.delayed(Duration(milliseconds: 500));
+  //       signUpWithNewId = true;
+  //       Navigator.push(context,
+  //           MaterialPageRoute(builder: (context) => Screen2(signUpWithNewId),),
+  //       );
+  //   }
+  //
+  // }
+
 
   @override
   Widget build(BuildContext context) {

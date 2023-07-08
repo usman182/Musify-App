@@ -40,6 +40,12 @@ class _Screen10State extends State<Screen10> {
   String SONG = "";
   String SONGPATH = "";
 
+  late File mp3File;
+  String mp3FileName = "";
+  String mp3FilePath = "";
+
+  late PlatformFile file;
+
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -85,7 +91,7 @@ class _Screen10State extends State<Screen10> {
                     ),
                     onTap: () {
                       Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => Screen9(),),);
+                        MaterialPageRoute(builder: (context) => Screen9(mp3File, mp3FileName, mp3FilePath, titleController.text.toString(), genreController.text.toString(), descController.text.toString()),),);
                     },
                   ),
                 ],
@@ -104,23 +110,12 @@ class _Screen10State extends State<Screen10> {
                   FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.audio);
 
                   if (result != null) {
-                    PlatformFile file = result.files.first;
+                    file = result.files.first;
 
-                    File mp3File = File(file.path!);
-                    String mp3FileName = file.name;
-                    String mp3FilePath = mp3File.path;
+                    mp3File = File(file.path!);
+                    mp3FileName = file.name;
+                    mp3FilePath = mp3File.path;
 
-                    FirebaseAuth auth = FirebaseAuth.instance;
-                    User? user = auth.currentUser;
-
-                    Reference storageRef = FirebaseStorage.instance.ref().child('${user?.uid}/mp3s/$mp3FileName');
-                    UploadTask uploadTask = storageRef.putFile(mp3File);
-
-                    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-                    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-
-                    Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Screen5(mp3FileName, downloadUrl),),);
                   }
                 },),
               ),
@@ -195,7 +190,10 @@ class _Screen10State extends State<Screen10> {
                             borderRadius: BorderRadius.circular(30.0)
                         ),),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Screen9(mp3File, mp3FileName, mp3FilePath, titleController.text.toString(), genreController.text.toString(), descController.text.toString()),),);
+                      },
                       child: Text("Upload", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),),
                     ),
                   ),
