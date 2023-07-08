@@ -22,7 +22,12 @@ class Screen10 extends StatefulWidget {
   String emailFromSignUp;
   String passwordFromSignUp;
 
-  Screen10(this.emailFromSignUp, this.passwordFromSignUp);
+  String mp3FileName;
+  String mp3FilePath;
+  String playlistName;
+  String descOfMusic;
+
+  Screen10(this.emailFromSignUp, this.passwordFromSignUp, this.mp3FileName, this.mp3FilePath, this.playlistName, this.descOfMusic);
 
   @override
   State<Screen10> createState() => _Screen10State();
@@ -90,8 +95,13 @@ class _Screen10State extends State<Screen10> {
                       child: Text("Next", style: TextStyle(color: Color(0xFFd4b300), fontWeight: FontWeight.bold, fontSize: 18,),),
                     ),
                     onTap: () {
+
                       Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => Screen9(mp3File, mp3FileName, mp3FilePath, titleController.text.toString(), genreController.text.toString(), descController.text.toString()),),);
+                        MaterialPageRoute(builder: (context) => Screen5(widget.mp3FileName, widget.mp3FilePath, widget.playlistName, widget.descOfMusic),),);
+
+
+                      // Navigator.push(context,
+                      //   MaterialPageRoute(builder: (context) => Screen9(mp3File, mp3FileName, mp3FilePath, titleController.text.toString(), genreController.text.toString(), descController.text.toString()),),);
                     },
                   ),
                 ],
@@ -107,6 +117,7 @@ class _Screen10State extends State<Screen10> {
                 child: GestureDetector(
                     child: Image.asset("assests/images/upload.png",),
                 onTap: () async {
+
                   FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.audio);
 
                   if (result != null) {

@@ -1,5 +1,7 @@
 
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
@@ -10,11 +12,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Screen5 extends StatefulWidget {
 
-  var musicName;
-  var musicUrl;
+  String musicName;
+  String musicUrl;
 
-  var playlistName;
-  var playlistDescription;
+  String playlistName;
+  String playlistDescription;
 
   Screen5(this.musicName, this.musicUrl, this.playlistName, this.playlistDescription);
 
@@ -32,6 +34,10 @@ class _Screen5State extends State<Screen5> {
   AudioPlayer audioPlayer = AudioPlayer();
   bool isPlaying = false;
 
+  Map<String, String> songDictionary = {};
+
+  int playingSongCurrentIndex = 0;
+
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -39,7 +45,6 @@ class _Screen5State extends State<Screen5> {
       _selectedIndex = index;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +101,7 @@ class _Screen5State extends State<Screen5> {
                         ),
                         Container(
                             margin: EdgeInsets.only(top: 10),
-                            child: Text(widget.playlistName, style: TextStyle(color: Color(0xFFd4b300), fontWeight: FontWeight.normal, fontSize: 20,),)
+                            child: Text(widget.playlistName.isNotEmpty ? widget.playlistName : "Playlist 1", style: TextStyle(color: Color(0xFFd4b300), fontWeight: FontWeight.normal, fontSize: 20,),)
                         ),
                       ],
                     ),
@@ -198,7 +203,7 @@ class _Screen5State extends State<Screen5> {
               GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => Screen17(audioPlayer, widget.musicUrl)),);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => Screen17(audioPlayer, widget.musicUrl, songDictionary, playingSongCurrentIndex)),);
                 },
                 child: Column(
                   children: [
@@ -224,7 +229,8 @@ class _Screen5State extends State<Screen5> {
                       margin: EdgeInsets.only(left: 20),
                       child: Row(
                         children: [
-                          Text(widget.musicName, style: TextStyle(color: Color(0xFFd4b300), fontWeight: FontWeight.bold, fontSize: 18),),
+                          Text(songDictionary.isNotEmpty
+                          ? songDictionary.keys.elementAt(playingSongCurrentIndex) : "No song avaliable", style: TextStyle(color: Color(0xFFd4b300), fontWeight: FontWeight.bold, fontSize: 18),),
                         ],
                       ),
                     ),
@@ -235,7 +241,18 @@ class _Screen5State extends State<Screen5> {
                     Container(
                       child: Row(
                         children: [
-                          IconButton(onPressed: () {}, icon: FaIcon(Icons.skip_previous, size: 35, color: Color(0xFFd4b300),),),
+                          IconButton(onPressed: () async {
+                            playingSongCurrentIndex--;
+                            if (playingSongCurrentIndex < 0) {
+                              playingSongCurrentIndex = songDictionary.length - 1;
+                            }
+                            await audioPlayer.setUrl(songDictionary.values.elementAt(playingSongCurrentIndex));
+                            audioPlayer.play();
+                            print('Audio playing');
+                            setState(() {
+                              isPlaying = true;
+                            });
+                          }, icon: FaIcon(Icons.skip_previous, size: 35, color: Color(0xFFd4b300),),),
                         ],
                       ),
                     ),
@@ -260,7 +277,18 @@ class _Screen5State extends State<Screen5> {
                     Container(
                       child: Row(
                         children: [
-                          IconButton(onPressed: () {}, icon: FaIcon(Icons.skip_next, size: 35, color: Color(0xFFd4b300),),),
+                          IconButton(onPressed: () async {
+                            playingSongCurrentIndex++;
+                            if (playingSongCurrentIndex >= songDictionary.length) {
+                              playingSongCurrentIndex = 0;
+                            }
+                            await audioPlayer.setUrl(songDictionary.values.elementAt(playingSongCurrentIndex));
+                            audioPlayer.play();
+                            print('Audio playing');
+                            setState(() {
+                              isPlaying = true;
+                            });
+                          }, icon: FaIcon(Icons.skip_next, size: 35, color: Color(0xFFd4b300),),),
                         ],
                       ),
                     ),
@@ -322,7 +350,23 @@ class _Screen5State extends State<Screen5> {
   }
 
   Future<void> playMusic() async {
-    await audioPlayer.setUrl(widget.musicUrl);
+
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User? user = auth.currentUser;
+
+    Reference storageRef = FirebaseStorage.instance.ref().child('${user?.uid}/${widget.playlistName}/mp3s');
+    ListResult result = await storageRef.listAll();
+
+
+    for (Reference ref in result.items) {
+      String downloadUrl = await ref.getDownloadURL();
+      String songName = ref.name;
+      print("Hello1, $songName");
+      songDictionary[songName] = downloadUrl;
+    }
+
+
+    await audioPlayer.setUrl(songDictionary.values.elementAt(playingSongCurrentIndex));
     audioPlayer.play();
     print('Audio playing');
     setState(() {

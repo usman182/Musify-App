@@ -156,7 +156,7 @@ class _Screen3State extends State<Screen3> {
 
                     if (emailFromFirestore == emailController.text.toString() && passwordFromFirestore == passwordController.text.toString()) {
                       Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => Screen10(emailController.text.toString(), passwordController.text.toString()),),);
+                        MaterialPageRoute(builder: (context) => Screen10(emailController.text.toString(), passwordController.text.toString(), "", "", "", ""),),);
                     }
                   },
                   child: Text("Sign In", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),

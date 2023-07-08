@@ -8,9 +8,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class Screen17 extends StatefulWidget {
 
   var audioPlayerinstance;
-  var musicName;
+  var audioUrl;
+  Map<String, String> songDictionary;
+  var playingSongCurrentIndex;
 
-  Screen17(this.audioPlayerinstance, this.musicName);
+  Screen17(this.audioPlayerinstance, this.audioUrl, this.songDictionary, this.playingSongCurrentIndex);
 
   @override
   State<Screen17> createState() => _Screen17State();
@@ -72,9 +74,11 @@ class _Screen17State extends State<Screen17> {
                 child: Row(
                   children: [
                     Container(
+                      width: MediaQuery.of(context).size.width * (1/2 + 0.10),
                       margin: EdgeInsets.only(top: 100, left: 15),
                       alignment: Alignment.topLeft,
-                      child: Text("Song Title", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 35,),),
+                      child: Text(
+                        widget.songDictionary.keys.elementAt(widget.playingSongCurrentIndex), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 32,),),
                     ),
                     Spacer(),
                     Container(
@@ -103,7 +107,18 @@ class _Screen17State extends State<Screen17> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                          IconButton(onPressed: () {}, icon: FaIcon(Icons.skip_previous, size: 50, color: Color(0xFFd4b300),),),
+                          IconButton(onPressed: () async {
+                            widget.playingSongCurrentIndex--;
+                            if (widget.playingSongCurrentIndex < 0) {
+                              widget.playingSongCurrentIndex = widget.songDictionary.length - 1;
+                            }
+                            await widget.audioPlayerinstance.setUrl(widget.songDictionary.values.elementAt(widget.playingSongCurrentIndex));
+                            widget.audioPlayerinstance.play();
+                            print('Audio playing');
+                            setState(() {
+                              isPlaying = true;
+                            });
+                          }, icon: FaIcon(Icons.skip_previous, size: 50, color: Color(0xFFd4b300),),),
                           IconButton(onPressed: () {
                             setState(() {
                               isPlaying = !isPlaying;
@@ -116,7 +131,18 @@ class _Screen17State extends State<Screen17> {
                             });
 
                           }, icon: isPlaying ? FaIcon(Icons.pause, size: 50, color: Color(0xFFd4b300),) : FaIcon(Icons.play_arrow, size: 50, color: Color(0xFFd4b300),)),
-                          IconButton(onPressed: () {}, icon: FaIcon(Icons.skip_next, size: 50, color: Color(0xFFd4b300),),),
+                          IconButton(onPressed: () async {
+                            widget.playingSongCurrentIndex++;
+                            if (widget.playingSongCurrentIndex >= widget.songDictionary.length) {
+                              widget.playingSongCurrentIndex = 0;
+                            }
+                            await widget.audioPlayerinstance.setUrl(widget.songDictionary.values.elementAt(widget.playingSongCurrentIndex));
+                            widget.audioPlayerinstance.play();
+                            print('Audio playing');
+                            setState(() {
+                              isPlaying = true;
+                            });
+                          }, icon: FaIcon(Icons.skip_next, size: 50, color: Color(0xFFd4b300),),),
                         ],
                 ),
               ),

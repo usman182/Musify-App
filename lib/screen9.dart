@@ -59,7 +59,7 @@ class _Screen9State extends State<Screen9> {
                     ),
                     onTap: () {
                       Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => Screen10("", ""),),);
+                        MaterialPageRoute(builder: (context) => Screen10("", "", playlistNameController.text.toString(), widget.mp3FilePath,playlistNameController.text.toString(), descController.text.toString()),),);
                     },
                   ),
                   Container(
@@ -134,6 +134,9 @@ class _Screen9State extends State<Screen9> {
                       ),
                       onPressed: () async {
 
+                        Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => Screen10("", "", widget.mp3FileName, widget.mp3FilePath, playlistNameController.text.toString(), widget.descOfMusic),),);
+
                         FirebaseAuth auth = FirebaseAuth.instance;
                         User? user = auth.currentUser;
 
@@ -158,14 +161,14 @@ class _Screen9State extends State<Screen9> {
 
 
                             // Add the data to the "Music collection
-                            await musicCollection.doc(playlistNameController.text.toString()).set({
+                            await musicCollection.doc(user.uid).set({
                               "Title": widget.titleOfMusic,
                               "Genre": widget.genreOfMusic,
                               "Description": widget.descOfMusic,
                             });
 
-                            Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => Screen5(widget.mp3FileName, widget.mp3FilePath, playlistNameController.text.toString(), descController.text.toString()),),);
+                            // Navigator.push(context,
+                            //   MaterialPageRoute(builder: (context) => Screen5(widget.mp3FileName, widget.mp3FilePath, playlistNameController.text.toString(), descController.text.toString()),),);
                           }
                         }
 
